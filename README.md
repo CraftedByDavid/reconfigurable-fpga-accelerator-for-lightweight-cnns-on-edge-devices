@@ -263,10 +263,51 @@ DDR ↔ CDMA ↔ BRAM
 * Scale to larger models
 
 ---
+## 🎥 Demo Video
 
-## 🔒 Source Code
+This demo showcases the complete working of the FPGA-based CNN accelerator using **AXI CDMA-based high-speed data transfer**.
 
-Private repository (selected parts shared)
+---
+
+### 🔹 Accelerator Demo
+
+<p align="center">
+  <a href="https://github.com/your-username/reconfigurable-fpga-cnn-accelerator/demo_video.mp4">
+    <img src="Project_diagrams/demo_thumbnail.png" width="600"/>
+  </a>
+</p>
+
+---
+
+### 📌 Demo Description
+
+The demonstration performs real-time inference using a **LeNet model deployed on FPGA**.
+
+* A handwritten digit (**digit "4"**) is drawn using **MS Paint** with a mouse
+* The image is processed and sent to the FPGA
+* Data transfer is handled using **AXI CDMA (DMA-based transfer)**
+* The accelerator performs CNN inference
+* The predicted output is successfully returned and displayed
+
+---
+
+### 🚀 Key Highlights
+
+* Real-time handwritten digit recognition on FPGA
+* **Digit "4" correctly classified** by the accelerator
+* High-speed **DDR ↔ BRAM transfer using CDMA**
+* Demonstrates full pipeline:
+
+  * Input capture → Transfer → Inference → Output
+
+---
+
+### ⚙️ What This Proves
+
+* End-to-end system integration (Software + Hardware)
+* Functional correctness of CNN accelerator
+* Effectiveness of DMA-based optimization
+* Practical usability in edge AI applications
 
 ---
 
