@@ -194,14 +194,23 @@ DDR ↔ CDMA ↔ BRAM
 
 ## ⏱️ Inference Latency
 
-| Method        | Time         |
-| ------------- | ------------ |
-| MMIO (No DMA) | **0.463 ms** |
-| CDMA (DMA)    | **0.041 ms** |
+| Platform                         | Method             | Time         |
+| -------------------------------- | ------------------ | ------------ |
+| CPU (Laptop - i3 13th Gen, 3GHz) | Software Inference | **0.129 s**  |
+| FPGA                             | MMIO (No DMA)      | **0.463 ms** |
+| FPGA                             | CDMA (DMA)         | **0.041 ms** |
 
-### 🚀 Speedup
+---
 
-👉 ~**11× faster** using CDMA
+### 🚀 Performance Insight
+
+* FPGA (CDMA) is ~**3146× faster than CPU inference**
+* FPGA (CDMA) is ~**11× faster than MMIO-based FPGA execution**
+* Massive improvement due to:
+
+  * Parallel computation
+  * DMA-based data transfer
+  * On-chip memory usage
 
 ---
 
@@ -235,12 +244,54 @@ DDR ↔ CDMA ↔ BRAM
 
 ---
 
+## 🧪 Experimental Results
+
+### 🔹 CPU Inference Output
+
+<p align="center">
+  <img src="Project_diagrams/cpu_inference.png" width="700"/>
+</p>
+
+---
+
+### 🔹 Layer-wise Timing (Software)
+
+<p align="center">
+  <img src="Project_diagrams/layer_timing.png" width="700"/>
+</p>
+
+---
+
+### 🔹 FPGA Accelerator Output
+
+<p align="center">
+  <img src="Project_diagrams/fpga_output.png" width="700"/>
+</p>
+
+---
+
 ## 🧠 Key Observations
 
 * CDMA removes CPU bottleneck
 * 128-bit BRAM improves bandwidth
 * Parallel lanes fully utilized
+* FPGA significantly outperforms CPU execution
 * Design meets timing comfortably
+
+---
+
+## ⚠️ Implementation Note
+
+* The FPGA inference pipeline is currently controlled using **Python (Jupyter Notebook in PYNQ framework)**
+* Device drivers and configuration are handled via Python APIs
+
+### 🔹 Optimization Opportunity
+
+* Further performance improvement is possible by:
+
+  * Implementing driver/control in **low-level languages (C/C++)**
+  * Reducing software overhead
+  * Enabling tighter hardware-software integration
 
 ---
 
@@ -255,14 +306,6 @@ DDR ↔ CDMA ↔ BRAM
 
 ---
 
-## 🚀 Future Work
-
-* Add more CNN layers
-* Dynamic reconfiguration
-* RISC-V integration
-* Scale to larger models
-
----
 ## 🎥 Demo Video
 
 This demo showcases the complete working of the FPGA-based CNN accelerator using **AXI CDMA-based high-speed data transfer**.
@@ -277,33 +320,27 @@ https://github.com/user-attachments/assets/8310e763-1414-4d1d-b30a-5c4015e775ea
 
 ### 📌 Demo Description
 
-The demonstration performs real-time inference using a **LeNet model deployed on FPGA**.
-
-* A handwritten digit (**digit "4"**) is drawn using **MS Paint** with a mouse
-* The image is processed and sent to the FPGA
-* Data transfer is handled using **AXI CDMA (DMA-based transfer)**
-* The accelerator performs CNN inference
-* The predicted output is successfully returned and displayed
+* A handwritten digit (**digit "4"**) is drawn using **MS Paint**
+* Image is sent to FPGA via CDMA
+* LeNet model performs inference
+* Output is correctly predicted
 
 ---
 
 ### 🚀 Key Highlights
 
-* Real-time handwritten digit recognition on FPGA
-* **Digit "4" correctly classified** by the accelerator
-* High-speed **DDR ↔ BRAM transfer using CDMA**
-* Demonstrates full pipeline:
-
-  * Input capture → Transfer → Inference → Output
+* Real-time handwritten digit recognition
+* Correct classification of digit **"4"**
+* Full pipeline demonstration
 
 ---
 
-### ⚙️ What This Proves
+## 🚀 Future Work
 
-* End-to-end system integration (Software + Hardware)
-* Functional correctness of CNN accelerator
-* Effectiveness of DMA-based optimization
-* Practical usability in edge AI applications
+* Add more CNN layers
+* Dynamic reconfiguration
+* RISC-V integration
+* Scale to larger models
 
 ---
 
