@@ -37,12 +37,6 @@ This section presents multiple abstraction levels of the system design.
   <img src="Project_diagrams/overall_diagram.png" width="750"/>
 </p>
 
-**Description:**
-
-* Shows interaction between **Processing System (PS)** and **Programmable Logic (PL)**
-* AXI interfaces used for control and data transfer
-* Demonstrates system-level integration
-
 ---
 
 ### 🔷 2. Core Architecture (PL Design)
@@ -50,12 +44,6 @@ This section presents multiple abstraction levels of the system design.
 <p align="center">
   <img src="Project_diagrams/core_architecture.png" width="750"/>
 </p>
-
-**Description:**
-
-* Shows internal PL components
-* BRAM-based memory system
-* Compute engine and control modules
 
 ---
 
@@ -65,12 +53,6 @@ This section presents multiple abstraction levels of the system design.
   <img src="Project_diagrams/computation_block.png" width="750"/>
 </p>
 
-**Description:**
-
-* 16-lane parallel computation
-* Multiplier and accumulation flow
-* Convolution data path
-
 ---
 
 ### 🔷 4. Memory Architecture (Lane-Based Design)
@@ -79,307 +61,215 @@ This section presents multiple abstraction levels of the system design.
   <img src="Project_diagrams/memory_configuration.png" width="750"/>
 </p>
 
-**Description:**
-
-* 32-bit BRAM-based conceptual design
-* Parallel memory structure
-* Lane-based organization
-
-> ⚠️ Note: The above diagram represents the **initial conceptual design using 32-bit BRAMs**.
-> The final implementation uses a **single 128-bit BRAM with CDMA-based data transfer**, replacing multiple 32-bit BRAMs for improved throughput.
+> ⚠️ Note: The above diagram represents the **initial 32-bit BRAM design**.
+> The final implementation uses a **single 128-bit BRAM with CDMA-based transfer**, replacing multiple 32-bit BRAMs.
 
 ---
 
 ## 🧠 RTL Architecture (PL)
 
-The programmable logic consists of the following RTL modules:
-
-### 🔹 Control Interface
-
 * AXI4-Lite Control Interface
-* Handles configuration and control signals
-
-### 🔹 Address Generation
-
-* Address Generator Module
-* Controls memory access patterns for convolution
-
-### 🔹 Memory Subsystem
-
-* Input Feature Map BRAM
-* Kernel BRAM
-* Output Feature Map BRAM
+* Address Generator
+* Input / Kernel / Output BRAM
 * AXI BRAM Controllers
-
-### 🔹 Compute Engine
-
-* 16-lane Parallel Multiplier Array
-* Accumulator Module
-
-### 🔹 Post-Processing
-
-* ReLU Activation Unit (optional)
-* Max Pooling Unit
-
-### 🔹 Data Write Back
-
+* 16-lane Multiplier Array
+* Accumulator
+* ReLU + Pooling Units
 * Data Write Module
 
 ---
 
 ## ⚙️ Memory Architecture
 
-### 🔹 Initial Design (Conceptual)
+### 🔹 Initial Design
 
-* BRAM width: 32 bits
-* Multiple BRAMs used in parallel
-* Limited by MMIO-based transfers
-
----
-
-### 🔹 Optimized Design (Final Implementation)
-
-The architecture was enhanced using **AXI Central DMA (CDMA)** to improve data throughput.
-
-* **BRAM Width:** 128 bits
-* **Memory Depth:** 1024
-* **Data Type:** INT8
-
-👉 Each 128-bit word stores:
-
-* **16 INT8 values (16 parallel lanes)**
+* 32-bit BRAM
+* Multiple BRAMs
+* MMIO-based transfer
 
 ---
 
-### 🚀 Key Optimization
+### 🔹 Optimized Design
 
-* Replaced **MMIO-based transfers** with **DMA-based transfers (CDMA)**
-* Enabled **direct DDR ↔ BRAM data movement**
-* Increased BRAM width from **32-bit → 128-bit**
-* Enabled **128-bit burst transfers**
+* **128-bit BRAM**
+* **Depth: 1024**
+* **INT8 data**
 
----
-
-### 🧠 Design Impact
-
-| Feature       | Before                | After            |
-| ------------- | --------------------- | ---------------- |
-| Data Transfer | MMIO (CPU-controlled) | CDMA (DMA-based) |
-| BRAM Width    | 32-bit                | 128-bit          |
-| BRAM Count    | 4                     | 1                |
-| Throughput    | Low                   | High             |
-| CPU Overhead  | High                  | Minimal          |
+👉 1 word = **16 parallel values**
 
 ---
 
-### ⚡ Result
+### 🚀 Key Improvements
 
-* Faster data movement between PS and PL
-* Reduced CPU involvement
-* Improved overall accelerator throughput
+* MMIO → **CDMA (DMA-based transfer)**
+* Direct **DDR ↔ BRAM**
+* **128-bit burst transfers**
+* Reduced BRAM count (4 → 1)
 
 ---
 
-## 🚀 Parallel Processing (Lane-Based Design)
+### 🧠 Impact
 
-The accelerator uses a **16-lane parallel architecture**.
+| Feature  | Before | After   |
+| -------- | ------ | ------- |
+| Transfer | MMIO   | CDMA    |
+| Width    | 32-bit | 128-bit |
+| BRAMs    | 4      | 1       |
+| CPU Load | High   | Low     |
+| Speed    | Low    | High    |
 
-### Data Layout:
+---
+
+## 🚀 Parallel Processing
+
+* 16-lane architecture
+* Parallel channel processing
 
 ```
-Depth 0 → [lane15[0], lane14[0], ..., lane0[0]]
-Depth 1 → [lane15[1], lane14[1], ..., lane0[1]]
-...
+Depth 0 → [lane15 ... lane0]
+Depth 1 → [lane15 ... lane0]
 ```
-
-### Key Advantage:
-
-* Processes **16 channels in parallel**
-* Significantly improves throughput
 
 ---
 
 ## 🔁 Supported Operations
 
-### ✔️ Convolution
-
 * Standard Convolution
 * Depthwise Convolution
-
-### ✔️ Kernel Sizes
-
-* 1×1, 2×2, 3×3, 5×5, 7×7
-
-### ✔️ Activation
-
-* Optional ReLU
-
-### ✔️ Pooling
-
+* Kernel sizes: 1×1 to 7×7
+* ReLU
 * Max Pooling
 
 ---
 
 ## 📊 Data Precision
 
-* Input: INT8
-* Weights: INT8
-* Output: INT8
-
-### Benefits:
-
-* Reduced memory usage
-* Increased parallelism
-* Efficient edge deployment
+* INT8 (input, weights, output)
 
 ---
 
-## 🔗 PS–PL Interaction (AXI Interface)
+## 🔗 PS–PL Interaction
 
-### 🔹 AXI4-Lite (Control Path)
+### AXI4-Lite
 
-Used for:
-
-* Configuration
-* Start/Stop control
-* Status monitoring
-
-Flow:
+Control + configuration
 
 ```
-PS → AXI4-Lite → Control Registers → PL
+PS → AXI-Lite → PL
 ```
 
----
+### AXI + BRAM
 
-### 🔹 AXI4 (Data Path via BRAM Controller)
-
-Used for:
-
-* Input data transfer
-* Kernel loading
-* Output retrieval
-
-Flow:
+Data movement
 
 ```
-PS ↔ AXI BRAM Controller ↔ BRAM ↔ Compute Engine
+PS ↔ BRAM ↔ Compute
 ```
 
 ---
 
 ## ⚡ High-Speed Data Transfer using CDMA
 
-To overcome the limitations of MMIO-based transfers, the design integrates **AXI Central DMA (CDMA)**.
-
-### 🔹 Motivation
-
-* MMIO transfers are CPU-driven and slow
-* Limits achievable bandwidth
-
----
-
-### 🔹 Solution
-
-* Enables **direct memory access between DDR and BRAM**
-
-```
-DDR (PS) ↔ CDMA ↔ BRAM (PL)
-```
-
----
-
-### 🔹 Benefits
-
 * Eliminates CPU bottleneck
-* Supports burst transfers
-* Maximizes bandwidth
-* Enables wider BRAM design
+* Enables burst transfers
+* Improves bandwidth
 
----
-
-### 🔹 Outcome
-
-* Higher throughput
-* Reduced latency
-* Better utilization of compute engine
+```
+DDR ↔ CDMA ↔ BRAM
+```
 
 ---
 
 ## 🔄 Execution Flow
 
-1. **Configuration**
-
-   * PS sets parameters via AXI-Lite
-
-2. **Data Load**
-
-   * Input feature maps → BRAM
-   * Kernel weights → BRAM
-
-3. **Execution**
-
-   * Address generator feeds compute engine
-   * Convolution + activation + pooling
-
-4. **Write Back**
-
-   * Results stored in BRAM
-
-5. **Read Back**
-
-   * PS retrieves results via AXI/CDMA
+1. Configure via AXI-Lite
+2. Load data to BRAM
+3. Run computation
+4. Store results
+5. Read back
 
 ---
 
-## 🔁 Reconfigurability
+# 📊 Results & Performance
 
-The accelerator supports:
+## ⏱️ Inference Latency
 
-* Kernel size selection
-* Convolution type (standard / depthwise)
-* ReLU enable/disable
-* Parallel lane-based processing
+| Method        | Time         |
+| ------------- | ------------ |
+| MMIO (No DMA) | **0.463 ms** |
+| CDMA (DMA)    | **0.041 ms** |
+
+### 🚀 Speedup
+
+👉 ~**11× faster** using CDMA
 
 ---
 
-## 🛠️ Tools & Technologies
+## ⚙️ Clock Configuration
 
-* Verilog / SystemVerilog
-* Vivado Design Suite
-* FPGA Platforms: Zynq Ultrascale, PYNQ
-* AXI Protocol
+* **Frequency:** 125 MHz
+
+---
+
+## 📈 Resource Utilization
+
+* **CLB LUTs:** 17,327
+* **Registers:** 25,599
+* **BRAM Tiles:** 20
+* **URAM:** 16
+* **DSPs:** 17
+
+👉 Balanced usage across compute and memory resources
+
+---
+
+## ⏲️ Timing Summary
+
+* **Worst Negative Slack (WNS):** 0.081 ns
+* **Worst Hold Slack (WHS):** 0.010 ns
+* **Total Negative Slack (TNS):** 0.000 ns
+
+✅ All timing constraints met
+✅ No setup/hold violations
+✅ Stable at 125 MHz
+
+---
+
+## 🧠 Key Observations
+
+* CDMA removes CPU bottleneck
+* 128-bit BRAM improves bandwidth
+* Parallel lanes fully utilized
+* Design meets timing comfortably
 
 ---
 
 ## 📊 Key Highlights
 
 * 16-lane parallel architecture
-* 128-bit optimized memory design
-* CDMA-based high-speed transfer
-* Multi-kernel support (1×1 to 7×7)
-* Depthwise + standard convolution
-* INT8 optimized inference
-* Designed for edge devices
+* 128-bit memory system
+* CDMA-based transfer
+* Multi-kernel support
+* INT8 optimized
+* Edge-device ready
 
 ---
 
 ## 🚀 Future Work
 
-* Support for additional CNN layers
+* Add more CNN layers
 * Dynamic reconfiguration
-* Integration with RISC-V systems
-* Scaling to larger CNN models
+* RISC-V integration
+* Scale to larger models
 
 ---
 
 ## 🔒 Source Code
 
-The complete implementation is maintained in a private repository.
-Selected modules and architectural details are shared here.
+Private repository (selected parts shared)
 
 ---
 
 ## 📬 Contact
 
-For further discussion or collaboration, feel free to reach out.
+Open for collaboration and discussion
