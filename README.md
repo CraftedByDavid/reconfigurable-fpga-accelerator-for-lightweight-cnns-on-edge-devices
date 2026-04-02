@@ -265,7 +265,7 @@ DDR ↔ CDMA ↔ BRAM
 ### 🔹 FPGA Accelerator Output
 
 <p align="center">
-  <img src="Project_diagrams/fpga_output.png" width="700"/>
+  <img src="Project_diagrams/fpga_output.jpg" width="700"/>
 </p>
 
 ---
