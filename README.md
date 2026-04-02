@@ -271,11 +271,7 @@ This demo showcases the complete working of the FPGA-based CNN accelerator using
 
 ### 🔹 Accelerator Demo
 
-<p align="center">
-  <a href="https://github.com/your-username/reconfigurable-fpga-cnn-accelerator/demo_video.mp4">
-    <img src="Project_diagrams/demo_thumbnail.png" width="600"/>
-  </a>
-</p>
+https://github.com/user-attachments/assets/8310e763-1414-4d1d-b30a-5c4015e775ea
 
 ---
 
